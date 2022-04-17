@@ -60,8 +60,10 @@ public class MainActivity extends AppCompatActivity {
         binding.imageView.setImage(ImageSource.bitmap(imgRes));
 
         binding.start.setOnClickListener(view -> showStartDialog());
-
         binding.end.setOnClickListener(view -> showEndDialog());
+        binding.add.setOnClickListener(view -> showShtukaDalog());
+        binding.createAnomaly.setOnClickListener(view -> showCreateAnomalyDialog());
+
     }
 
     private void updateImgRes(List<Radio> anomalies) {
@@ -94,25 +96,9 @@ public class MainActivity extends AppCompatActivity {
             p.setStrokeWidth(6.5f);
             canvas.drawLine(startx.floatValue() * 50, starty.floatValue() * 50, endx.floatValue() * 50, endy.floatValue() * 50, p);
         }
-        binding.add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-                showShtukaDalog();
-
-            }
-        });
-
-        binding.createAnomaly.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                showCreateAnomalyDialog();
-
-            }
-        });
-
-
+        imgRes = tmp;
+        binding.imageView.setImage(ImageSource.bitmap(imgRes));
     }
 
     private void showCreateAnomalyDialog(){
@@ -151,14 +137,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                b.dismiss();
-
-            }
-        });
+        close.setOnClickListener(view -> b.dismiss());
 
 
     }
@@ -194,47 +173,7 @@ public class MainActivity extends AppCompatActivity {
         anomaly.setAdapter(anomaly_adapter);
 
 
-
-
-        add.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                String srank = rank.getText().toString().trim();
-
-            if (!TextUtils.isEmpty(srank)){
-
-                if (Integer.parseInt(srank) > 0){
-
-                    Log.d("TAGG", "Create shtuka");
-                    b.dismiss();
-
-                } else {
-
-                    rank.setError("Числа не входят в диапазон");
-
-                }
-
-            } else {
-
-                rank.setError("Введите ранк");
-
-            }
-
-            }
-        });
-
-        close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                b.dismiss();
-
-            }
-        });
-
-        imgRes = tmp;
-        binding.imageView.setImage(ImageSource.bitmap(imgRes));
+        close.setOnClickListener(view -> b.dismiss());
     }
 
     private void showEndDialog(){
