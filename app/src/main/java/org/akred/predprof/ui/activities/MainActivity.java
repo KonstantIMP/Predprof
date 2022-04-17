@@ -30,7 +30,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private DataViewModel dataViewModel;
     private ActivityMainBinding binding;
-    private double startx, starty, endx, endy;
+    private Double startx = null, starty = null, endx = null, endy = null;
     private Bitmap imgRes = null;
 
     @Override
@@ -53,6 +53,10 @@ public class MainActivity extends AppCompatActivity {
 
         imgRes = BitmapFactory.decodeResource(getResources(), R.drawable.map);
         binding.imageView.setImage(ImageSource.bitmap(imgRes));
+
+        binding.start.setOnClickListener(view -> showStartDialog());
+
+        binding.end.setOnClickListener(view -> showEndDialog());
     }
 
     private void updateImgRes(List<Anomaly> anomalies) {
@@ -89,43 +93,33 @@ public class MainActivity extends AppCompatActivity {
         b.setCancelable(false);
         b.show();
 
-        set.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        set.setOnClickListener(view -> {
 
-                if(!TextUtils.isEmpty(x.getText().toString())){
+            if(!TextUtils.isEmpty(x.getText().toString())){
 
-                    if(!TextUtils.isEmpty(y.getText().toString())){
+                if(!TextUtils.isEmpty(y.getText().toString())){
 
-                        endx = Double.parseDouble(x.getText().toString());
-                        endy = Double.parseDouble(y.getText().toString());
-                        b.dismiss();
+                    endx = Double.parseDouble(x.getText().toString());
+                    endy = Double.parseDouble(y.getText().toString());
+                    b.dismiss();
 
-                    } else{
+                } else{
 
-                        y.setError("Введите Y");
-                        y.requestFocus();
-
-                    }
-
-                } else {
-
-                    x.setError("Введите X");
-                    x.requestFocus();
+                    y.setError("Введите Y");
+                    y.requestFocus();
 
                 }
 
-            }
-        });
+            } else {
 
-        close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                b.dismiss();
+                x.setError("Введите X");
+                x.requestFocus();
 
             }
+
         });
+
+        close.setOnClickListener(view -> b.dismiss());
 
     }
 
@@ -146,43 +140,33 @@ public class MainActivity extends AppCompatActivity {
         b.setCancelable(false);
         b.show();
 
-        set.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        set.setOnClickListener(view -> {
 
-                if(!TextUtils.isEmpty(x.getText().toString())){
+            if(!TextUtils.isEmpty(x.getText().toString())){
 
-                    if(!TextUtils.isEmpty(y.getText().toString())){
+                if(!TextUtils.isEmpty(y.getText().toString())){
 
-                        startx = Double.parseDouble(x.getText().toString());
-                        starty = Double.parseDouble(y.getText().toString());
-                        b.dismiss();
+                    startx = Double.parseDouble(x.getText().toString());
+                    starty = Double.parseDouble(y.getText().toString());
+                    b.dismiss();
 
-                    } else{
+                } else{
 
-                        y.setError("Введите Y");
-                        y.requestFocus();
-
-                    }
-
-                } else {
-
-                    x.setError("Введите X");
-                    x.requestFocus();
+                    y.setError("Введите Y");
+                    y.requestFocus();
 
                 }
 
-            }
-        });
+            } else {
 
-        close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                b.dismiss();
+                x.setError("Введите X");
+                x.requestFocus();
 
             }
+
         });
+
+        close.setOnClickListener(view -> b.dismiss());
 
     }
 
