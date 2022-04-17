@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<AnRoma> ar = new ArrayList<>();
 
         for (String k: dots.keySet()) {
-            ar.add(new AnRoma(temp.get(k).get(0).first, dots.get(k).first, dots.get(k).second);
+            ar.add(new AnRoma(temp.get(k).get(0).first, dots.get(k).first, dots.get(k).second));
         }
 
         Bitmap ab = BitmapFactory.decodeResource(getResources(), R.drawable.anomaly).copy(Bitmap.Config.ARGB_8888, true);
