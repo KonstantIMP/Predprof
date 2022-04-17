@@ -8,6 +8,7 @@
     tools:context=".ui.activities.MainActivity">
 
     <LinearLayout
+        android:layout_margin="10dp"
         android:layout_weight="1"
         android:orientation="vertical"
         android:layout_width="0dp"
@@ -28,7 +29,8 @@
         <Button
             android:id="@+id/add"
             app:icon="@drawable/ic_baseline_add_24"
-            android:layout_width="wrap_content"
+            android:text="Добавить"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
 
