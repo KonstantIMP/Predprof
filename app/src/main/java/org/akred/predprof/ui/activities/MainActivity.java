@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -42,14 +43,29 @@ public class MainActivity extends AppCompatActivity {
         dataViewModel.getAnomalies().observe(this, new Observer<List<Anomaly>>() {
             @Override
             public void onChanged(List<Anomaly> anomalies) {
-                Log.e("Woof", String.valueOf(anomalies.size()));
+                if (anomalies.size() == 0) return;
+                updateImgRes(anomalies);
             }
         });
 
-        //imgRes = BitmapFactory
+        imgRes = BitmapFactory.decodeResource(getResources(), R.drawable.map);
+        binding.imageView.setImage(ImageSource.bitmap(imgRes));
+    }
 
-        binding.imageView.setImage(ImageSource.resource(R.drawable.map));
+    private void updateImgRes(List<Anomaly> anomalies) {
+        Bitmap tmp = BitmapFactory.decodeResource(getResources(), R.drawable.map);
+        tmp = tmp.copy(Bitmap.Config.ARGB_8888, true);
+        Canvas canvas = new Canvas(tmp);
+        Bitmap anomalyBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.anomaly);
 
+        for(Anomaly anomaly : anomalies) {
+            canvas.drawBitmap(anomalyBitmap,
+                    Double.valueOf(Math.max(0, 50 * anomaly.coords.get(0) - 32)).floatValue(),
+                    Double.valueOf(Math.max(0, 50 * anomaly.coords.get(1) - 32)).floatValue(),
+                    null);
+        }
 
+        imgRes = tmp;
+        binding.imageView.setImage(ImageSource.bitmap(imgRes));
     }
 }
