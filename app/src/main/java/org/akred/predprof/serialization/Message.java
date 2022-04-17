@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Message {
 
-    public List<Anomaly> message = new ArrayList<>();
+    public List<Radio> message = new ArrayList<>();
 
     public Message() {}
 }

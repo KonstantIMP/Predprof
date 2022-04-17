@@ -2,16 +2,15 @@ package org.akred.predprof.ui.activities;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -22,8 +21,9 @@ import com.davemorrissey.labs.subscaleview.ImageSource;
 import org.akred.predprof.R;
 import org.akred.predprof.databinding.ActivityMainBinding;
 import org.akred.predprof.models.DataViewModel;
-import org.akred.predprof.network.DataClient;
 import org.akred.predprof.serialization.Anomaly;
+import org.akred.predprof.serialization.Radio;
+import org.akred.predprof.serialization.Swan;
 
 import java.util.List;
 
@@ -43,12 +43,9 @@ public class MainActivity extends AppCompatActivity {
         dataViewModel = new ViewModelProvider(this).get(DataViewModel.class);
         dataViewModel.getDataFromServer(this);
 
-        dataViewModel.getAnomalies().observe(this, new Observer<List<Anomaly>>() {
-            @Override
-            public void onChanged(List<Anomaly> anomalies) {
-                if (anomalies.size() == 0) return;
-                updateImgRes(anomalies);
-            }
+        dataViewModel.getAnomalies().observe(this, anomalies -> {
+            if (anomalies.size() == 0) return;
+            updateImgRes(anomalies);
         });
 
         imgRes = BitmapFactory.decodeResource(getResources(), R.drawable.map);
@@ -59,17 +56,35 @@ public class MainActivity extends AppCompatActivity {
         binding.end.setOnClickListener(view -> showEndDialog());
     }
 
-    private void updateImgRes(List<Anomaly> anomalies) {
+    private void updateImgRes(List<Radio> anomalies) {
         Bitmap tmp = BitmapFactory.decodeResource(getResources(), R.drawable.map);
         tmp = tmp.copy(Bitmap.Config.ARGB_8888, true);
         Canvas canvas = new Canvas(tmp);
-        Bitmap anomalyBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.anomaly);
+        Bitmap anomalyBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.radio);
 
-        for(Anomaly anomaly : anomalies) {
+        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+        p.setColor(Color.argb(100, 255, 0, 0));
+
+        for(Radio anomaly : anomalies) {
+            for (Swan swan : anomaly.swans) {
+                canvas.drawCircle(
+                        Double.valueOf(Math.max(0, 50 * anomaly.coords.get(0))).floatValue(),
+                        Double.valueOf(Math.max(0, 50 * anomaly.coords.get(1))).floatValue(),
+                        Double.valueOf(swan.rate * 50).floatValue(),
+                        p
+                );
+            }
+
             canvas.drawBitmap(anomalyBitmap,
                     Double.valueOf(Math.max(0, 50 * anomaly.coords.get(0) - 32)).floatValue(),
                     Double.valueOf(Math.max(0, 50 * anomaly.coords.get(1) - 32)).floatValue(),
                     null);
+        }
+
+        if (startx != null && starty != null && endx != null && endy != null) {
+            p.setColor(Color.argb(255, 255, 255, 255));
+            p.setStrokeWidth(6.5f);
+            canvas.drawLine(startx.floatValue() * 50, starty.floatValue() * 50, endx.floatValue() * 50, endy.floatValue() * 50, p);
         }
 
         imgRes = tmp;
@@ -129,7 +144,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        close.setOnClickListener(view -> b.dismiss());
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                b.dismiss();
+                updateImgRes(dataViewModel.getAnomalies().getValue());
+            }
+        });
 
     }
 
@@ -188,7 +209,13 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-        close.setOnClickListener(view -> b.dismiss());
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                b.dismiss();
+                updateImgRes(dataViewModel.getAnomalies().getValue());
+            }
+        });
 
     }
 

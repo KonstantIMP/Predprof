@@ -1,24 +1,16 @@
 package org.akred.predprof.network;
 
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.google.gson.GsonBuilder;
 
-import org.akred.predprof.serialization.Anomaly;
+import org.akred.predprof.serialization.Radio;
 import org.akred.predprof.serialization.Message;
 
-import java.io.IOException;
 import java.util.List;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
-import okio.BufferedSink;
 
 public class DataClient {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
@@ -33,7 +25,7 @@ public class DataClient {
                 .build();
     }
 
-    public List<Anomaly> getData() {
+    public List<Radio> getData() {
         Request request = new Request.Builder()
                 .url(SERVER_ADDRESS)
                 .addHeader("X-Auth-Token", ACCESS_TOKEN)
