@@ -95,20 +95,31 @@ public class MainActivity extends AppCompatActivity {
 
         set.setOnClickListener(view -> {
 
-            if(!TextUtils.isEmpty(x.getText().toString())){
+                String sx = x.getText().toString().trim(), sy = y.getText().toString().trim();
 
-                if(!TextUtils.isEmpty(y.getText().toString())){
+                if(!TextUtils.isEmpty(sx)){
 
-                    endx = Double.parseDouble(x.getText().toString());
-                    endy = Double.parseDouble(y.getText().toString());
-                    b.dismiss();
+                    if(!TextUtils.isEmpty(sy)){
 
-                } else{
+                        if (Double.parseDouble(sx) > 0.0 && Double.parseDouble(sx) < 40.0 && Double.parseDouble(sy) > 0.0 && Double.parseDouble(sy) < 30.0){
+
+                            endx = Double.parseDouble(sx);
+                            endy = Double.parseDouble(sy);
+                            b.dismiss();
+
+                        } else {
+
+                            x.setError("Числа не входят в диапазон");
+                            x.requestFocus();
+
+                        }
+
+                    } else{
 
                     y.setError("Введите Y");
                     y.requestFocus();
 
-                }
+                    }
 
             } else {
 
@@ -116,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
                 x.requestFocus();
 
             }
-
         });
 
         close.setOnClickListener(view -> b.dismiss());
@@ -142,27 +152,39 @@ public class MainActivity extends AppCompatActivity {
 
         set.setOnClickListener(view -> {
 
-            if(!TextUtils.isEmpty(x.getText().toString())){
+                String sx = x.getText().toString().trim(), sy = y.getText().toString().trim();
 
-                if(!TextUtils.isEmpty(y.getText().toString())){
+                if(!TextUtils.isEmpty(sx)){
 
-                    startx = Double.parseDouble(x.getText().toString());
-                    starty = Double.parseDouble(y.getText().toString());
-                    b.dismiss();
+                    if(!TextUtils.isEmpty(sy)){
 
-                } else{
+                        if (Double.parseDouble(sx) > 0.0 && Double.parseDouble(sx) < 40.0 && Double.parseDouble(sy) > 0.0 && Double.parseDouble(sy) < 30.0){
 
-                    y.setError("Введите Y");
-                    y.requestFocus();
+                            startx = Double.parseDouble(sx);
+                            starty = Double.parseDouble(sy);
+                            b.dismiss();
+
+                        }  else {
+
+                            x.setError("Числа не входят в диапазон");
+                            x.requestFocus();
+
+                        }
+
+
+                    } else{
+
+                        y.setError("Введите Y");
+                        y.requestFocus();
+
+                    }
+
+                } else {
+
+                    x.setError("Введите X");
+                    x.requestFocus();
 
                 }
-
-            } else {
-
-                x.setError("Введите X");
-                x.requestFocus();
-
-            }
 
         });
 
