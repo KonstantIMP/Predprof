@@ -150,6 +150,20 @@ public class MainActivity extends AppCompatActivity {
 
         td = dots;
 
+        class AnRoma {
+            public Double rank, x, y;
+
+            public AnRoma(Double a, Double b, Double c) {
+                rank = a; x = b; y = c;
+            }
+        }
+
+        ArrayList<AnRoma> ar = new ArrayList<>();
+
+        for (String k: dots.keySet()) {
+            ar.add(new AnRoma(temp.get(k).get(0).first, dots.get(k).first, dots.get(k).second);
+        }
+
         Bitmap ab = BitmapFactory.decodeResource(getResources(), R.drawable.anomaly).copy(Bitmap.Config.ARGB_8888, true);
 
         for (Pair<Double,Double> dts: dots.values()) {
