@@ -21,8 +21,6 @@ import java.util.concurrent.TimeUnit;
 public class DataViewModel extends ViewModel {
     private MutableLiveData<List<Radio>> anomalies = new MutableLiveData<>(new ArrayList<>());
 
-    private MutableLiveData<HashMap<String, Anomaly>> ranks = new MutableLiveData<>(new HashMap<>());
-
     public void getDataFromServer(Activity act) {
         Runnable requestTask = () -> {
             while (act != null) {
@@ -32,23 +30,6 @@ public class DataViewModel extends ViewModel {
 
                 if (tmp != null) {
                     anomalies.postValue(tmp);
-
-                    HashMap<String, Anomaly> ttt = new HashMap<>();
-
-                    for (Radio r: tmp) {
-
-                        for(Swan sp: r.swans) {
-                            if (ttt.containsKey(sp.id) == false) ttt.put(sp.id, new Anomaly(sp.id));
-                            Anomaly.AnomalyData ad = new Anomaly.AnomalyData();
-                            ad.x = r.coords.get(0); ad.y = r.coords.get(1);
-                            ad.rank = sp.rate;
-                            ttt.get(sp.id).ranks.add(ad);
-                        }
-
-                    }
-
-                    ranks.postValue(ttt);
-
                     break;
                 }
 
@@ -68,9 +49,5 @@ public class DataViewModel extends ViewModel {
 
     public LiveData<List<Radio>> getAnomalies() {
         return anomalies;
-    }
-
-    public LiveData<HashMap<String, Anomaly>> getRanks() {
-        return ranks;
     }
 }

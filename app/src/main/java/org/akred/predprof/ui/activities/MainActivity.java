@@ -13,6 +13,7 @@ import android.graphics.Paint;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -31,15 +32,23 @@ import org.akred.predprof.serialization.Swan;
 import org.akred.predprof.serialization.Shtuka;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
     private DataViewModel dataViewModel;
     private ActivityMainBinding binding;
     private Double startx = null, starty = null, endx = null, endy = null;
     private Bitmap imgRes = null;
-    private Shtuka shtuka;
-    private ArrayList<String> anomalies = new ArrayList<>();
+    private ArrayList<Shtuka> shtukas = new ArrayList<>();
+    private Set<String> anomalies = new TreeSet<>();
+
+    private static final Double EPSILON = 0.5;
+
+    private HashMap<String, Pair<Double, Double>> td = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,9 +60,20 @@ public class MainActivity extends AppCompatActivity {
         dataViewModel = new ViewModelProvider(this).get(DataViewModel.class);
         dataViewModel.getDataFromServer(this);
 
-        dataViewModel.getAnomalies().observe(this, anomalies -> {
-            if (anomalies.size() == 0) return;
-            updateImgRes(anomalies);
+        dataViewModel.getAnomalies().observe(this, anomaliess -> {
+            if (anomaliess.size() == 0) return;
+
+            Set<String> ans = new TreeSet<>();
+
+            for(Radio r: anomaliess) {
+                for (Swan sw: r.swans) {
+                    ans.add(sw.id);
+                }
+            }
+
+            anomalies.addAll(ans);
+
+            updateImgRes(anomaliess);
         });
 
         imgRes = BitmapFactory.decodeResource(getResources(), R.drawable.map);
@@ -80,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
                 canvas.drawCircle(
                         Double.valueOf(Math.max(0, 50 * anomaly.coords.get(0))).floatValue(),
                         Double.valueOf(Math.max(0, 50 * anomaly.coords.get(1))).floatValue(),
-                        Double.valueOf(swan.rate * 50).floatValue(),
+                        Double.valueOf(Math.sqrt(swan.rate) * 50).floatValue(),
                         p
                 );
             }
@@ -88,6 +108,54 @@ public class MainActivity extends AppCompatActivity {
             canvas.drawBitmap(anomalyBitmap,
                     Double.valueOf(Math.max(0, 50 * anomaly.coords.get(0) - 32)).floatValue(),
                     Double.valueOf(Math.max(0, 50 * anomaly.coords.get(1) - 32)).floatValue(),
+                    null);
+        }
+
+        HashMap<String, List<Pair<Double, Pair<Double, Double>>>> temp = new HashMap<>();
+
+        for (Radio radio: anomalies) {
+            for (Swan swan: radio.swans) {
+                if (temp.containsKey(swan.id) == false) temp.put(swan.id, new ArrayList<>());
+                temp.get(swan.id).add(new Pair<>(swan.rate, new Pair<>(radio.coords.get(0), radio.coords.get(1))));
+            }
+        }
+
+        for(Shtuka sh: shtukas) {
+            List<Radio> rs = anomalies.stream().filter(x -> String.valueOf(x.id).equals(sh.sensor)).collect(Collectors.toList());
+            if (rs.size() == 0) continue;
+
+            if (temp.containsKey(sh.anomaly) == false) temp.put(sh.anomaly, new ArrayList<>());
+            temp.get(sh.anomaly).add(new Pair<>(sh.rank, new Pair<>(rs.get(0).coords.get(0), rs.get(0).coords.get(1))));
+        }
+
+        HashMap<String, Pair<Double, Double>> dots = new HashMap<>();
+
+        for (String k: temp.keySet()) {
+            if (temp.get(k).size() < 3) continue;
+
+            for (float tx = 20.0f; tx >= 0.0f; tx -= 0.5f) {
+                for (float ty = 15.0f; ty >= 0.0f; ty -= 0.5f) {
+                    Double r1 = temp.get(k).get(0).first * (Math.pow(ty - temp.get(k).get(0).second.second, 2) + Math.pow(tx - temp.get(k).get(0).second.first, 2));
+                    Double r2 = temp.get(k).get(1).first * (Math.pow(ty - temp.get(k).get(0).second.second, 2) + Math.pow(tx - temp.get(k).get(0).second.first, 2));
+                    Double r3 = temp.get(k).get(2).first * (Math.pow(ty - temp.get(k).get(0).second.second, 2) + Math.pow(tx - temp.get(k).get(0).second.first, 2));
+
+                    if (r3 - r2 < EPSILON && r3 - r1 < EPSILON) {
+                        dots.put(k, new Pair<>(new Double(tx), new Double(ty)));
+                        break;
+                    }
+                }
+                if (dots.containsKey(k)) break;
+            }
+        }
+
+        td = dots;
+
+        Bitmap ab = BitmapFactory.decodeResource(getResources(), R.drawable.anomaly).copy(Bitmap.Config.ARGB_8888, true);
+
+        for (Pair<Double,Double> dts: dots.values()) {
+            canvas.drawBitmap(ab,
+                    Double.valueOf(Math.max(0, 50 * dts.first - 32)).floatValue(),
+                    Double.valueOf(Math.max(0, 50 * dts.second - 32)).floatValue(),
                     null);
         }
 
@@ -161,16 +229,45 @@ public class MainActivity extends AppCompatActivity {
         b.show();
 
         ArrayList<String> sensors = new ArrayList<>();
-        sensors.add("cccc");
-        sensors.add("ddd");
+
+        for (Radio radio: dataViewModel.getAnomalies().getValue()) {
+            sensors.add(String.valueOf(radio.id));
+        }
 
         ArrayAdapter<String> sensor_adapter = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, sensors);
         sensor.setAdapter(sensor_adapter);
-        anomalies.add("aaaa");
-        anomalies.add("bbb");
 
-        ArrayAdapter<String> anomaly_adapter = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, anomalies);
+        ArrayAdapter<String> anomaly_adapter = new ArrayAdapter<String>(this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, anomalies.stream().collect(Collectors.toList()));
         anomaly.setAdapter(anomaly_adapter);
+
+
+        add.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                String srank = rank.getText().toString().trim();
+
+                if (!TextUtils.isEmpty(srank)){
+
+                    if (Integer.parseInt(srank) > 0){
+
+                        shtukas.add(new Shtuka(sensor.getSelectedItem().toString(), anomaly.getSelectedItem().toString(), Integer.parseInt(srank)));
+                        b.dismiss();
+
+                    } else {
+
+                        rank.setError("Число не входит в диапозон");
+
+                    }
+
+                } else {
+
+                    rank.setError("Введите ранк");
+
+                }
+
+            }
+        });
 
 
         close.setOnClickListener(view -> b.dismiss());

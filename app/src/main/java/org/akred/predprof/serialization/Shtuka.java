@@ -7,4 +7,10 @@ public class Shtuka {
 
     public Shtuka() {
     }
+
+    public Shtuka(String sensor, String anomaly, double rank) {
+        this.sensor = sensor;
+        this.anomaly = anomaly;
+        this.rank = rank;
+    }
 }
