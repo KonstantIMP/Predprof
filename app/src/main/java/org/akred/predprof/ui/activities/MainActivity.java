@@ -5,6 +5,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
     private DataViewModel dataViewModel;
     private ActivityMainBinding binding;
 
+    private Bitmap imgRes = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("Woof", String.valueOf(anomalies.size()));
             }
         });
+
+        //imgRes = BitmapFactory
 
         binding.imageView.setImage(ImageSource.resource(R.drawable.map));
 
