@@ -1,4 +1,4 @@
-package org.akred.predprof;
+package org.akred.predprof.ui.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
