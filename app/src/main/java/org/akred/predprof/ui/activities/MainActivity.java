@@ -1,10 +1,5 @@
 package org.akred.predprof.ui.activities;
 
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -12,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,15 +15,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.davemorrissey.labs.subscaleview.ImageSource;
 
 import org.akred.predprof.R;
 import org.akred.predprof.databinding.ActivityMainBinding;
 import org.akred.predprof.models.DataViewModel;
-import org.akred.predprof.serialization.Anomaly;
 import org.akred.predprof.serialization.Radio;
-import org.akred.predprof.serialization.Swan;
 import org.akred.predprof.serialization.Shtuka;
+import org.akred.predprof.serialization.Swan;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,15 +36,13 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
+    private static final Double EPSILON = 0.5;
     private DataViewModel dataViewModel;
     private ActivityMainBinding binding;
     private Double startx = null, starty = null, endx = null, endy = null;
     private Bitmap imgRes = null;
-    private ArrayList<Shtuka> shtukas = new ArrayList<>();
-    private Set<String> anomalies = new TreeSet<>();
-
-    private static final Double EPSILON = 0.5;
-
+    private final ArrayList<Shtuka> shtukas = new ArrayList<>();
+    private final Set<String> anomalies = new TreeSet<>();
     private HashMap<String, Pair<Double, Double>> td = new HashMap<>();
 
     @Override
@@ -65,8 +60,8 @@ public class MainActivity extends AppCompatActivity {
 
             Set<String> ans = new TreeSet<>();
 
-            for(Radio r: anomaliess) {
-                for (Swan sw: r.swans) {
+            for (Radio r : anomaliess) {
+                for (Swan sw : r.swans) {
                     ans.add(sw.id);
                 }
             }
@@ -95,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
         p.setColor(Color.argb(100, 255, 0, 0));
 
-        for(Radio anomaly : anomalies) {
+        for (Radio anomaly : anomalies) {
             for (Swan swan : anomaly.swans) {
                 canvas.drawCircle(
                         Double.valueOf(Math.max(0, 50 * anomaly.coords.get(0))).floatValue(),
@@ -113,14 +108,14 @@ public class MainActivity extends AppCompatActivity {
 
         HashMap<String, List<Pair<Double, Pair<Double, Double>>>> temp = new HashMap<>();
 
-        for (Radio radio: anomalies) {
-            for (Swan swan: radio.swans) {
+        for (Radio radio : anomalies) {
+            for (Swan swan : radio.swans) {
                 if (temp.containsKey(swan.id) == false) temp.put(swan.id, new ArrayList<>());
                 temp.get(swan.id).add(new Pair<>(swan.rate, new Pair<>(radio.coords.get(0), radio.coords.get(1))));
             }
         }
 
-        for(Shtuka sh: shtukas) {
+        for (Shtuka sh : shtukas) {
             List<Radio> rs = anomalies.stream().filter(x -> String.valueOf(x.id).equals(sh.sensor)).collect(Collectors.toList());
             if (rs.size() == 0) continue;
 
@@ -130,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
 
         HashMap<String, Pair<Double, Double>> dots = new HashMap<>();
 
-        for (String k: temp.keySet()) {
+        for (String k : temp.keySet()) {
             if (temp.get(k).size() < 3) continue;
 
             for (float tx = 20.0f; tx >= 0.0f; tx -= 0.5f) {
@@ -151,22 +146,26 @@ public class MainActivity extends AppCompatActivity {
         td = dots;
 
         class AnRoma {
-            public Double rank, x, y;
+            public final Double rank;
+            public final Double x;
+            public final Double y;
 
             public AnRoma(Double a, Double b, Double c) {
-                rank = a; x = b; y = c;
+                rank = a;
+                x = b;
+                y = c;
             }
         }
 
         ArrayList<AnRoma> ar = new ArrayList<>();
 
-        for (String k: dots.keySet()) {
+        for (String k : dots.keySet()) {
             ar.add(new AnRoma(temp.get(k).get(0).first, dots.get(k).first, dots.get(k).second));
         }
 
         Bitmap ab = BitmapFactory.decodeResource(getResources(), R.drawable.anomaly).copy(Bitmap.Config.ARGB_8888, true);
 
-        for (Pair<Double,Double> dts: dots.values()) {
+        for (Pair<Double, Double> dts : dots.values()) {
             canvas.drawBitmap(ab,
                     Double.valueOf(Math.max(0, 50 * dts.first - 32)).floatValue(),
                     Double.valueOf(Math.max(0, 50 * dts.second - 32)).floatValue(),
@@ -183,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
         binding.imageView.setImage(ImageSource.bitmap(imgRes));
     }
 
-    private void showCreateAnomalyDialog(){
+    private void showCreateAnomalyDialog() {
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         LayoutInflater layoutInflater = getLayoutInflater();
@@ -205,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
 
                 String sname = name.getText().toString().trim();
 
-                if(!TextUtils.isEmpty(sname)){
+                if (!TextUtils.isEmpty(sname)) {
 
                     anomalies.add(sname);
                     b.dismiss();
@@ -224,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void showShtukaDalog(){
+    private void showShtukaDalog() {
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         LayoutInflater layoutInflater = getLayoutInflater();
@@ -244,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
 
         ArrayList<String> sensors = new ArrayList<>();
 
-        for (Radio radio: dataViewModel.getAnomalies().getValue()) {
+        for (Radio radio : dataViewModel.getAnomalies().getValue()) {
             sensors.add(String.valueOf(radio.id));
         }
 
@@ -261,9 +260,9 @@ public class MainActivity extends AppCompatActivity {
 
                 String srank = rank.getText().toString().trim();
 
-                if (!TextUtils.isEmpty(srank)){
+                if (!TextUtils.isEmpty(srank)) {
 
-                    if (Integer.parseInt(srank) > 0){
+                    if (Integer.parseInt(srank) > 0) {
 
                         shtukas.add(new Shtuka(sensor.getSelectedItem().toString(), anomaly.getSelectedItem().toString(), Integer.parseInt(srank)));
                         b.dismiss();
@@ -287,7 +286,7 @@ public class MainActivity extends AppCompatActivity {
         close.setOnClickListener(view -> b.dismiss());
     }
 
-    private void showEndDialog(){
+    private void showEndDialog() {
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         LayoutInflater layoutInflater = getLayoutInflater();
@@ -306,38 +305,38 @@ public class MainActivity extends AppCompatActivity {
 
         set.setOnClickListener(view -> {
 
-                String sx = x.getText().toString().trim(), sy = y.getText().toString().trim();
+            String sx = x.getText().toString().trim(), sy = y.getText().toString().trim();
 
-                if(!TextUtils.isEmpty(sx)){
+            if (!TextUtils.isEmpty(sx)) {
 
-                    if(!TextUtils.isEmpty(sy)){
+                if (!TextUtils.isEmpty(sy)) {
 
-                        if (Double.parseDouble(sx) > 0.0 && Double.parseDouble(sx) < 40.0 && Double.parseDouble(sy) > 0.0 && Double.parseDouble(sy) < 30.0){
+                    if (Double.parseDouble(sx) > 0.0 && Double.parseDouble(sx) < 40.0 && Double.parseDouble(sy) > 0.0 && Double.parseDouble(sy) < 30.0) {
 
-                            endx = Double.parseDouble(sx);
-                            endy = Double.parseDouble(sy);
-                            b.dismiss();
+                        endx = Double.parseDouble(sx);
+                        endy = Double.parseDouble(sy);
+                        b.dismiss();
 
-                        } else {
+                    } else {
 
-                            x.setError("Числа не входят в диапазон");
-                            x.requestFocus();
-
-                        }
-
-                    } else{
-
-                        y.setError("Введите Y");
-                        y.requestFocus();
+                        x.setError("Числа не входят в диапазон");
+                        x.requestFocus();
 
                     }
 
                 } else {
 
-                    x.setError("Введите X");
-                    x.requestFocus();
+                    y.setError("Введите Y");
+                    y.requestFocus();
 
                 }
+
+            } else {
+
+                x.setError("Введите X");
+                x.requestFocus();
+
+            }
 
 
         });
@@ -353,7 +352,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void showStartDialog(){
+    private void showStartDialog() {
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         LayoutInflater layoutInflater = getLayoutInflater();
@@ -372,39 +371,39 @@ public class MainActivity extends AppCompatActivity {
 
         set.setOnClickListener(view -> {
 
-                String sx = x.getText().toString().trim(), sy = y.getText().toString().trim();
+            String sx = x.getText().toString().trim(), sy = y.getText().toString().trim();
 
-                if(!TextUtils.isEmpty(sx)){
+            if (!TextUtils.isEmpty(sx)) {
 
-                    if(!TextUtils.isEmpty(sy)){
+                if (!TextUtils.isEmpty(sy)) {
 
-                        if (Double.parseDouble(sx) > 0.0 && Double.parseDouble(sx) < 40.0 && Double.parseDouble(sy) > 0.0 && Double.parseDouble(sy) < 30.0){
+                    if (Double.parseDouble(sx) > 0.0 && Double.parseDouble(sx) < 40.0 && Double.parseDouble(sy) > 0.0 && Double.parseDouble(sy) < 30.0) {
 
-                            startx = Double.parseDouble(sx);
-                            starty = Double.parseDouble(sy);
-                            b.dismiss();
+                        startx = Double.parseDouble(sx);
+                        starty = Double.parseDouble(sy);
+                        b.dismiss();
 
-                        }  else {
+                    } else {
 
-                            x.setError("Числа не входят в диапазон");
-                            x.requestFocus();
-
-                        }
-
-
-                    } else{
-
-                        y.setError("Введите Y");
-                        y.requestFocus();
+                        x.setError("Числа не входят в диапазон");
+                        x.requestFocus();
 
                     }
 
+
                 } else {
 
-                    x.setError("Введите X");
-                    x.requestFocus();
+                    y.setError("Введите Y");
+                    y.requestFocus();
 
                 }
+
+            } else {
+
+                x.setError("Введите X");
+                x.requestFocus();
+
+            }
 
 
         });

@@ -9,17 +9,14 @@ import androidx.lifecycle.ViewModel;
 
 import org.akred.predprof.R;
 import org.akred.predprof.network.DataClient;
-import org.akred.predprof.serialization.Anomaly;
 import org.akred.predprof.serialization.Radio;
-import org.akred.predprof.serialization.Swan;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class DataViewModel extends ViewModel {
-    private MutableLiveData<List<Radio>> anomalies = new MutableLiveData<>(new ArrayList<>());
+    private final MutableLiveData<List<Radio>> anomalies = new MutableLiveData<>(new ArrayList<>());
 
     public void getDataFromServer(Activity act) {
         Runnable requestTask = () -> {

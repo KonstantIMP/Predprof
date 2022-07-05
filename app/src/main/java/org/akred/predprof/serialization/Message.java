@@ -7,5 +7,6 @@ public class Message {
 
     public List<Radio> message = new ArrayList<>();
 
-    public Message() {}
+    public Message() {
+    }
 }
